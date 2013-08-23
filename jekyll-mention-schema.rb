@@ -6,10 +6,20 @@ module Jekyll
 		end
 
 		def render(context)
-			authors = context.registers[:site].config["authors"]
-			user = authors[@text]
+			rendered_text = Liquid::Template.parse(@text).render(context).gsub(/\\\{\\\{|\\\{\\%/, '\{\{' => '{{', '\{\%' => '{%')
+			args = rendered_text.split(' ')
+			user_name = args[0]
+			property = args[1]
 			
-			"<span itemscope='' itemtype='http://schema.org/Person'>" +
+			authors = context.registers[:site].config["authors"]
+			user = authors[user_name]
+			
+			itemprop = ""
+			if not property.nil?
+				itemprop = "itemprop='#{property}'"
+			end
+			
+			"<span #{itemprop} itemscope='' itemtype='http://schema.org/Person'>" +
 				"<meta itemprop='name' content='#{user["full_name"]}' />" +
 				"<meta itemprop='jobTitle' content='#{user["position"]}' />" +
 				"<a href='https://plus.google.com/#{user["gplus_id"]}' itemprop='url'>#{user["display_name"]}</a>" +
